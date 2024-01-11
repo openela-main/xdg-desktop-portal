@@ -1,0 +1,26 @@
+From 5b065233a76c642d0316d8f3143b0e63ca3b2d40 Mon Sep 17 00:00:00 2001
+From: Bastien Nocera <hadess@hadess.net>
+Date: Tue, 24 Aug 2021 16:38:18 +0200
+Subject: [PATCH] Force power-profiles-daemon support in
+
+---
+ src/power-profile-monitor.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/src/power-profile-monitor.c b/src/power-profile-monitor.c
+index 9ffa87a51296..d033feded5e0 100644
+--- a/src/power-profile-monitor.c
++++ b/src/power-profile-monitor.c
+@@ -28,9 +28,7 @@
+ #include "xdp-dbus.h"
+ #include "xdp-utils.h"
+ 
+-#if GLIB_CHECK_VERSION(2, 69, 1)
+ #define HAS_POWER_PROFILE_MONITOR 1
+-#endif
+ 
+ typedef struct _PowerProfileMonitor PowerProfileMonitor;
+ typedef struct _PowerProfileMonitorClass PowerProfileMonitorClass;
+-- 
+2.34.1
+
