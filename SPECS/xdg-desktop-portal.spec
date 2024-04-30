@@ -4,7 +4,7 @@
 %global low_memory_monitor_version 2.0
 
 Name:    xdg-desktop-portal
-Version: 1.12.4
+Version: 1.12.6
 Release: 1%{?dist}
 Summary: Portal frontend service to flatpak
 
@@ -104,6 +104,10 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 
 
 %changelog
+* Tue Nov 14 2023 Debarshi Ray <rishi@fedoraproject.org> - 1.12.6-1
+- Update to 1.12.6
+Resolves: RHEL-16451
+
 * Wed Apr 20 2022 Debarshi Ray <rishi@fedoraproject.org> - 1.12.4-1
 - Update to 1.12.4
 Resolves: #2068448, #2076812
