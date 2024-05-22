@@ -2,7 +2,7 @@
 %global geoclue_version 2.5.2
 
 Name:    xdg-desktop-portal
-Version: 1.8.1
+Version: 1.12.6
 Release: 1%{?dist}
 Summary: Portal frontend service to flatpak
 
@@ -10,8 +10,9 @@ License: LGPLv2+
 URL:     https://github.com/flatpak/xdg-desktop-portal/
 Source0: https://github.com/flatpak/xdg-desktop-portal/releases/download/%{version}/%{name}-%{version}.tar.xz
 
-BuildRequires: make
 BuildRequires: gcc
+BuildRequires: make
+BuildRequires: systemd-rpm-macros
 BuildRequires: pkgconfig(flatpak)
 BuildRequires: pkgconfig(fuse)
 BuildRequires: pkgconfig(gio-unix-2.0)
@@ -19,8 +20,6 @@ BuildRequires: pkgconfig(json-glib-1.0)
 BuildRequires: pkgconfig(libgeoclue-2.0) >= %{geoclue_version}
 BuildRequires: pkgconfig(libpipewire-0.3) >= %{pipewire_version}
 BuildRequires: /usr/bin/xmlto
-%{?systemd_requires}
-BuildRequires: systemd
 
 Requires:      dbus
 # Required version for icon validator.
@@ -97,6 +96,10 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 
 
 %changelog
+* Tue Nov 14 2023 Debarshi Ray <rishi@fedoraproject.org> - 1.12.6-1
+- Rebase to 1.12.6
+Resolves: RHEL-16452
+
 * Tue Oct 12 2021 Tomas Popela <tpopela@redhat.com> - 1.8.1-1
 - Rebase to 1.8.1
 - Explicit library Requires should be arch-specific
