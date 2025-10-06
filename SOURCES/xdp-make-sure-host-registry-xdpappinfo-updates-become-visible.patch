@@ -1,0 +1,43 @@
+From e71bb95ccbc1d5d73eef3fb4c4e6aa90c3ade08a Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Tue, 25 Feb 2025 14:19:57 +0100
+Subject: [PATCH] Make sure the Host Registry XdpAppInfo updates become visible
+
+The invocations are currently delegated to threads which means that the
+next invocation gets run before the first one finished. This is fine for
+all the other portals, but because the Registry modifies the identity of
+the caller for all following calls, we must ensure that it finishes
+before the next invocation. This means in particular no
+g-authorize-method and no FLAGS_HANDLE_METHOD_INVOCATIONS_IN_THREAD.
+---
+ src/xdg-desktop-portal.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/xdg-desktop-portal.c b/src/xdg-desktop-portal.c
+index edaebe1d1..addb06e2d 100644
+--- a/src/xdg-desktop-portal.c
++++ b/src/xdg-desktop-portal.c
+@@ -192,6 +192,14 @@ static void
+ export_host_portal_implementation (GDBusConnection        *connection,
+                                    GDBusInterfaceSkeleton *skeleton)
+ {
++  /* Host portal dbus method invocations run in the main thread without yielding
++   * to the main loop. This means that any later method call of any portal will
++   * see the effects of the host portal method call.
++   *
++   * This is important because the Registry modifies the XdpAppInfo and later
++   * method calls must see the modified value.
++   */
++
+   g_autoptr(GError) error = NULL;
+ 
+   if (skeleton == NULL)
+@@ -201,7 +209,7 @@ export_host_portal_implementation (GDBusConnection        *connection,
+     }
+ 
+   g_dbus_interface_skeleton_set_flags (skeleton,
+-                                       G_DBUS_INTERFACE_SKELETON_FLAGS_HANDLE_METHOD_INVOCATIONS_IN_THREAD);
++                                       G_DBUS_INTERFACE_SKELETON_FLAGS_NONE);
+ 
+   if (!g_dbus_interface_skeleton_export (skeleton,
+                                          connection,
