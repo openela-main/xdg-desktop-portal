@@ -3,12 +3,22 @@
 
 Name:    xdg-desktop-portal
 Version: 1.12.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Portal frontend service to flatpak
 
 License: LGPLv2+
 URL:     https://github.com/flatpak/xdg-desktop-portal/
 Source0: https://github.com/flatpak/xdg-desktop-portal/releases/download/%{version}/%{name}-%{version}.tar.xz
+
+# Upstream patches
+# https://github.com/flatpak/xdg-desktop-portal/pull/722
+Patch0:  xdp-bring-back-in-house-icon-validator.patch
+
+# Needed for autoreconf
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: gettext-devel
+BuildRequires: libtool
 
 BuildRequires: gcc
 BuildRequires: make
@@ -16,14 +26,13 @@ BuildRequires: systemd-rpm-macros
 BuildRequires: pkgconfig(flatpak)
 BuildRequires: pkgconfig(fuse)
 BuildRequires: pkgconfig(gio-unix-2.0)
+BuildRequires: pkgconfig(gdk-pixbuf-2.0)
 BuildRequires: pkgconfig(json-glib-1.0)
 BuildRequires: pkgconfig(libgeoclue-2.0) >= %{geoclue_version}
 BuildRequires: pkgconfig(libpipewire-0.3) >= %{pipewire_version}
 BuildRequires: /usr/bin/xmlto
 
 Requires:      dbus
-# Required version for icon validator.
-Recommends:    flatpak >= 1.2.0
 Requires:      geoclue2 >= %{geoclue_version}
 Recommends:    pipewire >= %{pipewire_version}
 Requires:      pipewire-libs%{?_isa} >= %{pipewire_version}
@@ -46,6 +55,7 @@ The pkg-config file for %{name}.
 
 %prep
 %autosetup -p1
+autoreconf -ifv
 
 
 %build
@@ -85,6 +95,7 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 %{_datadir}/dbus-1/services/org.freedesktop.impl.portal.PermissionStore.service
 %{_datadir}/%{name}
 %{_libexecdir}/xdg-desktop-portal
+%{_libexecdir}/xdg-desktop-portal-validate-icon
 %{_libexecdir}/xdg-document-portal
 %{_libexecdir}/xdg-permission-store
 %{_userunitdir}/%{name}.service
@@ -96,14 +107,18 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 
 
 %changelog
+* Tue Aug 25 2026 Jan Grulich <jgrulich@redhat.com> - 1.12.6-2
+- Drop "Recommends: flatpak" by bringing in-house icon validator
+  Resolves: RHEL-242651
+
 * Tue Nov 14 2023 Debarshi Ray <rishi@fedoraproject.org> - 1.12.6-1
 - Rebase to 1.12.6
-Resolves: RHEL-16452
+  Resolves: RHEL-16452
 
 * Tue Oct 12 2021 Tomas Popela <tpopela@redhat.com> - 1.8.1-1
 - Rebase to 1.8.1
 - Explicit library Requires should be arch-specific
-Resolves: #2062430
+  Resolves: #2062430
 
 * Tue Oct 12 2021 Tomas Popela <tpopela@redhat.com> - 1.6.0-6
 - Rebuild to recover from broken binutils
