@@ -5,7 +5,7 @@
 
 Name:    xdg-desktop-portal
 Version: 1.12.6
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 Summary: Portal frontend service to flatpak
 
 License: LGPLv2+
@@ -37,6 +37,15 @@ Requires:      low-memory-monitor >= %{low_memory_monitor_version}
 
 # https://github.com/flatpak/xdg-desktop-portal/pull/613
 Patch0: power-profiles-daemon-gnome-40-backport.patch
+
+# CVE-2026-55888
+# https://github.com/flatpak/xdg-desktop-portal/commit/2c3e519c4af7ee44da2bff8b0a449bf9a6a2882a
+# https://github.com/flatpak/xdg-desktop-portal/commit/1ca7932603b95b3ed650bcbe1a3bc6ce627197ff
+# https://github.com/flatpak/xdg-desktop-portal/commit/11665977836589ac08b334f884e153747749f707
+Patch1:  xdp-shared-utils-add-xdp_is_valid_filename-for-validating-filenames.patch
+Patch2:  xdp-document-portal-use-xdp_is_valid_filename-to-verify-filenames.patch
+Patch3:  xdp-file-chooser-validate-files-option-in-savefiles.patch
+
 
 %description
 xdg-desktop-portal works by exposing a series of D-Bus interfaces known as
@@ -104,6 +113,10 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 
 
 %changelog
+* Tue Nov 10 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 1.12.6-1.1
+- CVE-2026-55888 xdg-desktop-portal: Unauthorized host file access via unvalidated FileChooser filenames
+  Resolves: RHEL-291289
+
 * Tue Nov 14 2023 Debarshi Ray <rishi@fedoraproject.org> - 1.12.6-1
 - Update to 1.12.6
 Resolves: RHEL-16451
