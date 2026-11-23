@@ -1,0 +1,69 @@
+From 2c3e519c4af7ee44da2bff8b0a449bf9a6a2882a Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Tue, 16 Jun 2026 14:44:13 +0200
+Subject: [PATCH] shared/utils: Add xdp_is_valid_filename for validating
+ filenames
+
+Checks that the filename argument is a single path component that is
+safe to append to a directory path.
+
+We already have a few places in the code which need to check for this
+and will add more.
+---
+ src/xdp-utils.c | 15 +++++++++++++++
+ src/xdp-utils.h | 16 ++++++++++++++++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/src/xdp-utils.c b/src/xdp-utils.c
+index 902bb31..3385de6 100644
+--- a/src/xdp-utils.c
++++ b/src/xdp-utils.c
+@@ -516,6 +516,21 @@ xdp_spawn_full (const char * const  *argv,
+   return NULL;
+ }
+ 
++gboolean
++xdp_is_valid_filename (const char *filename)
++{
++  if (*filename == '\0')
++    return FALSE;
++
++  if (strcmp (filename, ".") == 0 || strcmp (filename, "..") == 0)
++    return FALSE;
++
++  if (strchr (filename, '/') != NULL)
++    return FALSE;
++
++  return TRUE;
++}
++
+ char *
+ xdp_canonicalize_filename (const char *path)
+ {
+diff --git a/src/xdp-utils.h b/src/xdp-utils.h
+index 59a18d6..3645f9e 100644
+--- a/src/xdp-utils.h
++++ b/src/xdp-utils.h
+@@ -118,6 +118,22 @@ char * xdp_spawn_full (const char * const  *argv,
+                        int                  target_fd,
+                        GError             **error);
+ 
++/**
++ * xdp_is_valid_filename:
++ * @filename: a filename to validate
++ *
++ * Checks whether @filename is a valid bare filename, i.e. a single path
++ * component that is safe to append to a directory path. Specifically, a
++ * valid filename must be non-empty and must not contain a path separator
++ * ('/').
++ *
++ * This does NOT check for filesystem length limits or invalid characters
++ * beyond '/'.
++ *
++ * Returns: %TRUE if @filename is valid, %FALSE otherwise
++ */
++gboolean xdp_is_valid_filename (const char *filename);
++
+ char * xdp_canonicalize_filename (const char *path);
+ gboolean  xdp_has_path_prefix (const char *str,
+                                const char *prefix);
