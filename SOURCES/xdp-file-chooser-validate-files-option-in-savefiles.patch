@@ -1,0 +1,64 @@
+From 11665977836589ac08b334f884e153747749f707 Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Tue, 16 Jun 2026 14:50:39 +0200
+Subject: [PATCH] file-chooser: Validate files option in SaveFiles
+
+We pass the files option to backends, and they are rather happy to just
+append the string to the selected directory. This gives apps arbitrary
+access to files.
+
+Fix this by validating the option in the frontend.
+
+Downstream adaptation note (RHEL backport to 1.20.0): in 1.20.0 the
+XdpOptionKey.validate callback has the signature
+(const char *key, GVariant *value, GVariant *options, GError **error)
+without a gpointer user_data argument. The user_data parameter was
+dropped from validate_files() to match; the logic is unchanged.
+---
+ src/file-chooser.c | 28 +++++++++++++++++++++++++++-
+ 1 file changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/src/file-chooser.c b/src/file-chooser.c
+index 86f3c9a..17a0fc5 100644
+--- a/src/file-chooser.c
++++ b/src/file-chooser.c
+@@ -620,12 +620,38 @@ handle_save_file (XdpFileChooser *object,
+   return TRUE;
+ }
+ 
++static gboolean
++validate_files (const char  *key,
++                GVariant    *value,
++                GVariant    *options,
++                GError     **error)
++{
++  g_autofree const char **filenames = NULL;
++
++  g_variant_get (value, "^a&ay", &filenames);
++
++  for (size_t i = 0; filenames[i] != NULL; i++)
++    {
++      if (!xdp_is_valid_filename (filenames[i]))
++        {
++          g_set_error (error,
++                       XDG_DESKTOP_PORTAL_ERROR,
++                       XDG_DESKTOP_PORTAL_ERROR_INVALID_ARGUMENT,
++                       "invalid filename: \"%s\"",
++                       filenames[i]);
++          return FALSE;
++        }
++    }
++
++  return TRUE;
++}
++
+ static XdpOptionKey save_files_options[] = {
+   { "accept_label", G_VARIANT_TYPE_STRING, NULL },
+   { "modal", G_VARIANT_TYPE_BOOLEAN, NULL },
+   { "current_name", G_VARIANT_TYPE_STRING, NULL },
+   { "current_folder", G_VARIANT_TYPE_BYTESTRING, NULL },
+-  { "files", G_VARIANT_TYPE_BYTESTRING_ARRAY, NULL },
++  { "files", G_VARIANT_TYPE_BYTESTRING_ARRAY, validate_files },
+   { "choices", (const GVariantType *)"a(ssa(ss)s)", validate_choices  }
+ };
+ 

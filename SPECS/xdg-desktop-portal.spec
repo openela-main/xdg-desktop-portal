@@ -3,7 +3,7 @@
 
 Name:    xdg-desktop-portal
 Version: 1.12.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Portal frontend service to flatpak
 
 License: LGPLv2+
@@ -13,6 +13,14 @@ Source0: https://github.com/flatpak/xdg-desktop-portal/releases/download/%{versi
 # Upstream patches
 # https://github.com/flatpak/xdg-desktop-portal/pull/722
 Patch0:  xdp-bring-back-in-house-icon-validator.patch
+
+# CVE-2026-55888
+# https://github.com/flatpak/xdg-desktop-portal/commit/2c3e519c4af7ee44da2bff8b0a449bf9a6a2882a
+# https://github.com/flatpak/xdg-desktop-portal/commit/1ca7932603b95b3ed650bcbe1a3bc6ce627197ff
+# https://github.com/flatpak/xdg-desktop-portal/commit/11665977836589ac08b334f884e153747749f707
+Patch1:  xdp-shared-utils-add-xdp_is_valid_filename-for-validating-filenames.patch
+Patch2:  xdp-document-portal-use-xdp_is_valid_filename-to-verify-filenames.patch
+Patch3:  xdp-file-chooser-validate-files-option-in-savefiles.patch
 
 # Needed for autoreconf
 BuildRequires: autoconf
@@ -107,6 +115,10 @@ install -dm 755 %{buildroot}/%{_datadir}/%{name}/portals
 
 
 %changelog
+* Tue Nov 10 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 1.12.6-3
+- CVE-2026-55888 xdg-desktop-portal: Unauthorized host file access via unvalidated FileChooser filenames
+  Resolves: RHEL-291276
+
 * Tue Aug 25 2026 Jan Grulich <jgrulich@redhat.com> - 1.12.6-2
 - Drop "Recommends: flatpak" by bringing in-house icon validator
   Resolves: RHEL-242651

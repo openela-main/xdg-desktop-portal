@@ -1,0 +1,35 @@
+From 1ca7932603b95b3ed650bcbe1a3bc6ce627197ff Mon Sep 17 00:00:00 2001
+From: Sebastian Wick <sebastian.wick@redhat.com>
+Date: Tue, 16 Jun 2026 14:47:51 +0200
+Subject: [PATCH] document-portal: Use xdp_is_valid_filename to verify
+ filenames
+
+The current checks do not take into account "." and "..". This isn't a
+vulnerability because the code paths are only reachable from host apps.
+Let's make this more robust anyways.
+---
+ document-portal/document-portal.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/document-portal/document-portal.c b/document-portal/document-portal.c
+index 04c4b8d..86a3a51 100644
+--- a/document-portal/document-portal.c
++++ b/document-portal/document-portal.c
+@@ -992,7 +992,7 @@ portal_add_named_full (GDBusMethodInvocation *invocation,
+         parent_fd = fds[parent_fd_id];
+     }
+ 
+-  if (strchr (filename, '/') != NULL || *filename == 0)
++  if (!xdp_is_valid_filename (filename))
+     {
+       g_dbus_method_invocation_return_error (invocation,
+                                              XDG_DESKTOP_PORTAL_ERROR, XDG_DESKTOP_PORTAL_ERROR_INVALID_ARGUMENT,
+@@ -1120,7 +1120,7 @@ portal_add_named (GDBusMethodInvocation *invocation,
+         parent_fd = fds[parent_fd_id];
+     }
+ 
+-  if (strchr (filename, '/') != NULL || *filename == 0)
++  if (!xdp_is_valid_filename (filename))
+     {
+       g_dbus_method_invocation_return_error (invocation,
+                                              XDG_DESKTOP_PORTAL_ERROR, XDG_DESKTOP_PORTAL_ERROR_INVALID_ARGUMENT,
